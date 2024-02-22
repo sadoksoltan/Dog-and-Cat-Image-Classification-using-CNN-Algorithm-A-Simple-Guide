@@ -1,0 +1,183 @@
+/////////////////////version 1 en python /////////////////////
+#Importing the Keras libraries and packages
+from keras.models import Sequential
+from tensorflow.keras.preprocessing import image
+from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
+from tensorflow.keras.preprocessing.image import ImageDataGenerator, load_img, img_to_array
+
+#Initialising the CNN
+classifier = Sequential()
+
+#Step 1 - Convolution
+classifier.add(Conv2D(32, (3, 3), input_shape = (64, 64, 3), activation = 'relu'))
+
+#Step 2 - Pooling
+classifier.add(MaxPooling2D(pool_size = (2, 2)))
+
+#Adding a second convolutional layer
+classifier.add(Conv2D(32, (3, 3), activation = 'relu'))
+classifier.add(MaxPooling2D(pool_size = (2, 2)))
+
+#Step 3 - Flattening
+classifier.add(Flatten())
+
+#Step 4 - Full connection
+classifier.add(Dense(units = 128, activation = 'relu'))
+classifier.add(Dense(units = 1, activation = 'sigmoid'))
+
+#Compiling the CNN
+classifier.compile(optimizer = 'adam', loss = 'binary_crossentropy', metrics = ['accuracy'])
+
+#Part 2 - Fitting the CNN to the images
+train_datagen = ImageDataGenerator(rescale = 1./255,
+shear_range = 0.2,
+zoom_range = 0.2,
+horizontal_flip = True)
+
+test_datagen = ImageDataGenerator(rescale = 1./255)
+
+training_set = train_datagen.flow_from_directory('C:/Users/soltan/Desktop/Jupyter ML/dataset/training_set',
+target_size = (64, 64),
+batch_size = 32,
+class_mode = 'binary')
+
+test_set = test_datagen.flow_from_directory('C:/Users/soltan/Desktop/Jupyter ML/dataset/test_set',
+target_size = (64, 64),
+batch_size = 32,
+class_mode = 'binary')
+
+history=classifier.fit(training_set,
+steps_per_epoch = len(training_set),
+epochs = 50,
+validation_data = test_set,
+validation_steps = len(test_set))
+#Part 3 - Making new predictions
+import numpy as np
+from tensorflow.keras.preprocessing import image
+
+test_image_path = 'C:/Users/soltan/Desktop/Jupyter ML/dataset/single_prediction/cat_or_dog_2.png'
+test_image = image.load_img(test_image_path, target_size=(64, 64))
+test_image = image.img_to_array(test_image)
+test_image = test_image/255.0 # Normalizing the pixel values
+test_image = np.expand_dims(test_image, axis=0)
+result = classifier.predict(test_image)
+
+if result[0][0] == 1:
+    prediction = 'dog'
+else:
+    prediction = 'cat'
+
+print(prediction)
+import matplotlib.pyplot as plt
+
+
+# Plotting the accuracy
+plt.plot(history.history['accuracy'])
+plt.plot(history.history['val_accuracy'])
+plt.title('Model Accuracy')
+plt.xlabel('Epoch')
+plt.ylabel('Accuracy')
+plt.legend(['Train', 'Test'], loc='upper left')
+plt.show()
+
+# Plotting the loss
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('Model Loss')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.legend(['Train', 'Test'], loc='upper left')
+plt.show()
+//////////////////////////////////////////////////////////////
+
+
+/////////////////////version 2 en R /////////////////////
+library(keras)
+
+# Initialiser le CNN
+classifier <- keras_model_sequential()
+
+# Étape 1 - Convolution
+classifier %>%
+  layer_conv_2d(filters = 32, kernel_size = c(3, 3), input_shape = c(64, 64, 3), activation = 'relu')
+
+# Étape 2 - Pooling
+classifier %>%
+  layer_max_pooling_2d(pool_size = c(2, 2))
+
+# Ajouter une deuxième couche de convolution
+classifier %>%
+  layer_conv_2d(filters = 32, kernel_size = c(3, 3), activation = 'relu') %>%
+  layer_max_pooling_2d(pool_size = c(2, 2))
+
+# Étape 3 - Aplatir
+classifier %>%
+  layer_flatten()
+
+# Étape 4 - Connexion complète
+classifier %>%
+  layer_dense(units = 128, activation = 'relu') %>%
+  layer_dense(units = 1, activation = 'sigmoid')
+
+# Compiler le CNN
+classifier %>%
+  compile(optimizer = 'adam', loss = 'binary_crossentropy', metrics = c('accuracy'))
+
+# Partie 2 - Adapter le CNN aux images
+train_datagen <- image_data_generator(
+  rescale = 1./255,
+  shear_range = 0.2,
+  zoom_range = 0.2,
+  horizontal_flip = TRUE
+)
+
+test_datagen <- image_data_generator(rescale = 1./255)
+
+training_set <- flow_images_from_directory(
+  'C:/Users/soltan/Desktop/Jupyter ML/dataset/training_set',
+  target_size = c(64, 64),
+  batch_size = 32,
+  class_mode = 'binary',
+  generator = train_datagen
+)
+
+test_set <- flow_images_from_directory(
+  'C:/Users/soltan/Desktop/Jupyter ML/dataset/test_set',
+  target_size = c(64, 64),
+  batch_size = 32,
+  class_mode = 'binary',
+  generator = test_datagen
+)
+
+# Adapter le modèle
+history <- classifier %>%
+  fit(
+    training_set,
+    steps_per_epoch = as.integer(length(training_set)),
+    epochs = 50,
+    validation_data = test_set,
+    validation_steps = as.integer(length(test_set))
+  )
+
+# Partie 3 - Faire de nouvelles prédictions
+test_image_path <- 'C:/Users/soltan/Desktop/Jupyter ML/dataset/single_prediction/cat_or_dog_3.png'
+test_image <- image_load(test_image_path, target_size = c(64, 64))
+test_image <- image_to_array(test_image)
+test_image <- array_reshape(test_image, c(1, dim(test_image)))
+
+# Normaliser les valeurs des pixels
+test_image <- test_image / 255.0
+
+# Faire une prédiction
+result <- predict(classifier, test_image)
+
+# Interpréter la prédiction
+if (result > 0.5) {
+  prediction <- 'chien'
+} else {
+  prediction <- 'chat'
+}
+
+print(prediction)
+
+//////////////////////////////////////////////////////////////
